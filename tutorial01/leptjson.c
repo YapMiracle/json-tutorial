@@ -2,7 +2,7 @@
 #include <assert.h>  /* assert() */
 #include <stdlib.h>  /* NULL */
 
-#define EXPECT(c, ch)       do { assert(*c->json == (ch)); c->json++; } while(0)
+#define EXPECT(c, ch)       do { assert(*c->json == (ch)); c->json++; } while(0)//分析第c的一个字符与ch是否相同
 
 typedef struct {
     const char* json;
@@ -13,7 +13,7 @@ static void lept_parse_whitespace(lept_context* c) {
     while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
         p++;
     c->json = p;
-}
+}//分析空格就是指针前进
 
 static int lept_parse_null(lept_context* c, lept_value* v) {
     EXPECT(c, 'n');
@@ -22,7 +22,7 @@ static int lept_parse_null(lept_context* c, lept_value* v) {
     c->json += 3;
     v->type = LEPT_NULL;
     return LEPT_PARSE_OK;
-}
+}//
 
 static int lept_parse_value(lept_context* c, lept_value* v) {
     switch (*c->json) {
@@ -39,9 +39,9 @@ int lept_parse(lept_value* v, const char* json) {
     v->type = LEPT_NULL;
     lept_parse_whitespace(&c);
     return lept_parse_value(&c, v);
-}
+}//不理解
 
 lept_type lept_get_type(const lept_value* v) {
     assert(v != NULL);
     return v->type;
-}
+}//返回数据类型

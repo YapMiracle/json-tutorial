@@ -37,19 +37,19 @@ static void* lept_context_push(lept_context* c, size_t size) {
     ret = c->stack + c->top;
     c->top += size;
     return ret;
-}
+}//压栈：需要一个lept_context，和size
 
 static void* lept_context_pop(lept_context* c, size_t size) {
     assert(c->top >= size);
     return c->stack + (c->top -= size);
-}
+}//
 
 static void lept_parse_whitespace(lept_context* c) {
     const char *p = c->json;
     while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
         p++;
     c->json = p;
-}
+}//解析空格
 
 static int lept_parse_literal(lept_context* c, lept_value* v, const char* literal, lept_type type) {
     size_t i;
@@ -60,29 +60,29 @@ static int lept_parse_literal(lept_context* c, lept_value* v, const char* litera
     c->json += i;
     v->type = type;
     return LEPT_PARSE_OK;
-}
+}//解析语义
 
 static int lept_parse_number(lept_context* c, lept_value* v) {
     const char* p = c->json;
     if (*p == '-') p++;
     if (*p == '0') p++;
     else {
-        if (!ISDIGIT1TO9(*p)) return LEPT_PARSE_INVALID_VALUE;
-        for (p++; ISDIGIT(*p); p++);
+        if (!ISDIGIT1TO9(*p)) return LEPT_PARSE_INVALID_VALUE;//第一个数字是1-9
+        for (p++; ISDIGIT(*p); p++);//后面是0-9
     }
-    if (*p == '.') {
+    if (*p == '.') {//出现小数点
         p++;
         if (!ISDIGIT(*p)) return LEPT_PARSE_INVALID_VALUE;
         for (p++; ISDIGIT(*p); p++);
     }
-    if (*p == 'e' || *p == 'E') {
+    if (*p == 'e' || *p == 'E') {//出现指数
         p++;
         if (*p == '+' || *p == '-') p++;
         if (!ISDIGIT(*p)) return LEPT_PARSE_INVALID_VALUE;
         for (p++; ISDIGIT(*p); p++);
     }
     errno = 0;
-    v->u.n = strtod(c->json, NULL);
+    v->u.n = strtod(c->json, NULL);//将c->json开始的字符串提取出来，赋值给n
     if (errno == ERANGE && (v->u.n == HUGE_VAL || v->u.n == -HUGE_VAL))
         return LEPT_PARSE_NUMBER_TOO_BIG;
     v->type = LEPT_NUMBER;
