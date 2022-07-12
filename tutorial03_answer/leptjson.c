@@ -42,7 +42,7 @@ static void* lept_context_push(lept_context* c, size_t size) {
 static void* lept_context_pop(lept_context* c, size_t size) {
     assert(c->top >= size);
     return c->stack + (c->top -= size);
-}//
+}//弹栈
 
 static void lept_parse_whitespace(lept_context* c) {
     const char *p = c->json;
@@ -54,13 +54,13 @@ static void lept_parse_whitespace(lept_context* c) {
 static int lept_parse_literal(lept_context* c, lept_value* v, const char* literal, lept_type type) {
     size_t i;
     EXPECT(c, literal[0]);
-    for (i = 0; literal[i + 1]; i++)
+    for (i = 0; literal[i + 1]; i++)//将c的json与literal对比，不相等返回invalid_value。
         if (c->json[i] != literal[i + 1])
             return LEPT_PARSE_INVALID_VALUE;
     c->json += i;
     v->type = type;
     return LEPT_PARSE_OK;
-}//解析语义
+}//解析语义：将c的json与literal对比，就是验证一遍，literal是字符串：true, false, null；这三种类型，
 
 static int lept_parse_number(lept_context* c, lept_value* v) {
     const char* p = c->json;
@@ -82,18 +82,18 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
         for (p++; ISDIGIT(*p); p++);
     }
     errno = 0;
-    v->u.n = strtod(c->json, NULL);//将c->json开始的字符串提取出来，赋值给n
-    if (errno == ERANGE && (v->u.n == HUGE_VAL || v->u.n == -HUGE_VAL))
+    v->u.n = strtod(c->json, NULL);//将c->json开始的字符串提取出来，转为double类型，赋值给n
+    if (errno == ERANGE && (v->u.n == HUGE_VAL || v->u.n == -HUGE_VAL))//ERANGE 不知道是什么？？？
         return LEPT_PARSE_NUMBER_TOO_BIG;
     v->type = LEPT_NUMBER;
     c->json = p;
-    return LEPT_PARSE_OK;
-}
+    return LEPT_PARSE_OK;//0
+}//解析数字
 
 static int lept_parse_string(lept_context* c, lept_value* v) {
     size_t head = c->top, len;
     const char* p;
-    EXPECT(c, '\"');
+    EXPECT(c, '\"');//判断第一个字符是不是"
     p = c->json;
     for (;;) {
         char ch = *p++;
@@ -129,7 +129,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                 PUTC(c, ch);
         }
     }
-}
+}//解析字符串
 
 static int lept_parse_value(lept_context* c, lept_value* v) {
     switch (*c->json) {
@@ -140,7 +140,7 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
         case '"':  return lept_parse_string(c, v);
         case '\0': return LEPT_PARSE_EXPECT_VALUE;
     }
-}
+}//验证c->json的数据类型
 
 int lept_parse(lept_value* v, const char* json) {
     lept_context c;
@@ -168,7 +168,7 @@ void lept_free(lept_value* v) {
     if (v->type == LEPT_STRING)
         free(v->u.s.s);
     v->type = LEPT_NULL;
-}
+}//如果是json_string类型，释放字符串的空间，free(v->u.s.s);
 
 lept_type lept_get_type(const lept_value* v) {
     assert(v != NULL);
@@ -178,33 +178,33 @@ lept_type lept_get_type(const lept_value* v) {
 int lept_get_boolean(const lept_value* v) {
     assert(v != NULL && (v->type == LEPT_TRUE || v->type == LEPT_FALSE));
     return v->type == LEPT_TRUE;
-}
+}//get_boolean
 
 void lept_set_boolean(lept_value* v, int b) {
     lept_free(v);
     v->type = b ? LEPT_TRUE : LEPT_FALSE;
-}
+}//set_boolean
 
 double lept_get_number(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_NUMBER);
     return v->u.n;
-}
+}//get_number
 
 void lept_set_number(lept_value* v, double n) {
     lept_free(v);
     v->u.n = n;
     v->type = LEPT_NUMBER;
-}
+}//set_number
 
 const char* lept_get_string(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_STRING);
     return v->u.s.s;
-}
+}//get_string
 
 size_t lept_get_string_length(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_STRING);
     return v->u.s.len;
-}
+}//get_string_length
 
 void lept_set_string(lept_value* v, const char* s, size_t len) {
     assert(v != NULL && (s != NULL || len == 0));
@@ -214,4 +214,4 @@ void lept_set_string(lept_value* v, const char* s, size_t len) {
     v->u.s.s[len] = '\0';
     v->u.s.len = len;
     v->type = LEPT_STRING;
-}
+}//set_string
