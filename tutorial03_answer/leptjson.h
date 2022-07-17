@@ -20,9 +20,9 @@ enum {
     LEPT_PARSE_ROOT_NOT_SINGULAR,
     LEPT_PARSE_NUMBER_TOO_BIG,
     LEPT_PARSE_MISS_QUOTATION_MARK,
-    LEPT_PARSE_INVALID_STRING_ESCAPE,
+    LEPT_PARSE_INVALID_STRING_ESCAPE,//不合法的转义字符的错误类型
     LEPT_PARSE_INVALID_STRING_CHAR
-};
+};//这几个值是什么意思？？？？！！！！！
 
 #define lept_init(v) do { (v)->type = LEPT_NULL; } while(0)
 
