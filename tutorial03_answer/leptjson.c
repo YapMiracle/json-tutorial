@@ -31,7 +31,7 @@ static void* lept_context_push(lept_context* c, size_t size) {
         if (c->size == 0)
             c->size = LEPT_PARSE_STACK_INIT_SIZE;
         while (c->top + size >= c->size)
-            c->size += c->size >> 1;  /* c->size * 1.5 */
+            c->size += c->size >> 1;  /* c->size * 1.5 *///扩容
         c->stack = (char*)realloc(c->stack, c->size);
     }
     ret = c->stack + c->top;
@@ -98,24 +98,24 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
     for (;;) {
         char ch = *p++;
         switch (ch) {
-            case '\"':
+            case '\"'://到了结尾了
                 len = c->top - head;
                 lept_set_string(v, (const char*)lept_context_pop(c, len), len);
                 c->json = p;
                 return LEPT_PARSE_OK;
             case '\\':
                 switch (*p++) {
-                    case '\"': PUTC(c, '\"'); break;
-                    case '\\': PUTC(c, '\\'); break;
-                    case '/':  PUTC(c, '/' ); break;
-                    case 'b':  PUTC(c, '\b'); break;
-                    case 'f':  PUTC(c, '\f'); break;
-                    case 'n':  PUTC(c, '\n'); break;
-                    case 'r':  PUTC(c, '\r'); break;
-                    case 't':  PUTC(c, '\t'); break;
-                    default:
+                    case '\"': PUTC(c, '\"'); break;//转义字符：\" 双引号字符 034
+                    case '\\': PUTC(c, '\\'); break;//转义字符：\\ 反斜杠 092
+                    case '/':  PUTC(c, '/' ); break;//转义字符：/ 正斜杠
+                    case 'b':  PUTC(c, '\b'); break;//转义字符：\b 退格(BS) 008
+                    case 'f':  PUTC(c, '\f'); break;//转义字符：\f 换页(FF) 012
+                    case 'n':  PUTC(c, '\n'); break;//转义字符：\n 换行(LF) 010
+                    case 'r':  PUTC(c, '\r'); break;//转义字符：\r 回车(CR) 013
+                    case 't':  PUTC(c, '\t'); break;//转义字符：\t 水平制表(HT) 009
+                    default://否则返回不合法的转义字符
                         c->top = head;
-                        return LEPT_PARSE_INVALID_STRING_ESCAPE;
+                        return LEPT_PARSE_INVALID_STRING_ESCAPE;//不合法的转义字符，Escape Character转义字符。
                 }
                 break;
             case '\0':
