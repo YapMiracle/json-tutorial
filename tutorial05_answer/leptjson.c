@@ -131,7 +131,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
     size_t head = c->top, len;
     unsigned u, u2;
     const char* p;
-    EXPECT(c, '\"');
+    EXPECT(c, '\"');//注意这里c->json++了
     p = c->json;
     for (;;) {
         char ch = *p++;
@@ -233,7 +233,7 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
         case 'n':  return lept_parse_literal(c, v, "null", LEPT_NULL);
         default:   return lept_parse_number(c, v);
         case '"':  return lept_parse_string(c, v);
-        case '[':  return lept_parse_array(c, v);
+        case '[':  return lept_parse_array(c, v);//新加了数组类型
         case '\0': return LEPT_PARSE_EXPECT_VALUE;
     }
 }
@@ -266,9 +266,9 @@ void lept_free(lept_value* v) {
         case LEPT_STRING:
             free(v->u.s.s);
             break;
-        case LEPT_ARRAY:
+        case LEPT_ARRAY://防止出现悬挂指针，做了压力测试
             for (i = 0; i < v->u.a.size; i++)
-                lept_free(&v->u.a.e[i]);
+                lept_free(&v->u.a.e[i]);//每一块空间都要释放
             free(v->u.a.e);
             break;
         default: break;
@@ -322,12 +322,12 @@ void lept_set_string(lept_value* v, const char* s, size_t len) {
     v->type = LEPT_STRING;
 }
 
-size_t lept_get_array_size(const lept_value* v) {
+size_t lept_get_array_size(const lept_value* v) {//获取数组的size
     assert(v != NULL && v->type == LEPT_ARRAY);
     return v->u.a.size;
 }
 
-lept_value* lept_get_array_element(const lept_value* v, size_t index) {
+lept_value* lept_get_array_element(const lept_value* v, size_t index) {//取出数组的下标为index元素
     assert(v != NULL && v->type == LEPT_ARRAY);
     assert(index < v->u.a.size);
     return &v->u.a.e[index];
