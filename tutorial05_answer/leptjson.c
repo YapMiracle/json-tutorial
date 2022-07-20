@@ -183,11 +183,11 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 
 static int lept_parse_value(lept_context* c, lept_value* v);
 
-static int lept_parse_array(lept_context* c, lept_value* v) {
+static int lept_parse_array(lept_context* c, lept_value* v) {//解析数组类型
     size_t i, size = 0;
     int ret;
     EXPECT(c, '[');
-    lept_parse_whitespace(c);
+    lept_parse_whitespace(c);//处理[后面的空格
     if (*c->json == ']') {
         c->json++;
         v->type = LEPT_ARRAY;
@@ -205,7 +205,7 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
         lept_parse_whitespace(c);
         if (*c->json == ',') {
             c->json++;
-            lept_parse_whitespace(c);
+            lept_parse_whitespace(c);//处理,后面的空格
         }
         else if (*c->json == ']') {
             c->json++;
